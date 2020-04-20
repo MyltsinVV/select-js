@@ -59,3 +59,22 @@
   color: #a0a0a0;
   cursor: unset;
 }
+
+#actions li {
+  margin-bottom: 5px;
+}
+
+#actions button {
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: none;
+  border: 1px solid #aeaeae;
+}
+
+#actions button:focus {
+  outline: unset;
+}
+
+#actions button:active {
+  background: #0048ff;
+}
