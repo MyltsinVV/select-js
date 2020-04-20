@@ -78,3 +78,31 @@
 #actions button:active {
   background: #0048ff;
 }
+
+#select .popup {
+  width: 350px;
+  position: absolute;
+  top: 35px;
+  display: none;
+}
+
+#select .popup.show {
+  display: block;
+}
+
+#select .option {
+  line-height: 30px;
+}
+
+#select .arrow {
+  position: absolute;
+  right: 5px;
+  border: 5px solid transparent;
+  top: 12px;
+  border-top-color: black;
+  border-bottom: 0;
+}
+
+#select .arrow.top {
+  transform: rotate(180deg);
+}
