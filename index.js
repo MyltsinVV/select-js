@@ -1,18 +1,30 @@
+const data = {
+  'aa': { label: 'JavaScript1' },
+  'ff': { label: 'JavaScript2' },
+  'bb': { label: 'JavaScript3' },
+  'gg': { label: 'JavaScript4' },
+  'tt': { label: 'JavaScript5' },
+  'ss': { label: 'JavaScript6' },
+  'qq': { label: 'JavaScript7' },
+  'cc': { label: 'JavaScript8' },
+}
+
 class Select {
   /**
    * @param {object} param - param
    * @param {string} param.selector - root selector
    * @param {string} param.label - label
-   * @param {string} param.url - utl date to select
    * @param {function} param.onSelect - function for on select
+   * @param {object[]} param.data - data
    */
   constructor(param) {
     this.rootElement = document.querySelector(param.selector)
     this.label = param.label
-    this.countOpenSelect = 0;
+    this.data = param.data
 
     this.createElements()
     this.events()
+    this.loadData()
   }
 
   createElements() {
@@ -37,70 +49,87 @@ class Select {
     popup.classList.add('popup')
     this.rootElement.append(popup)
 
-    // create loader
-    let loader = document.createElement('div')
-    loader.classList.add('option', 'loader')
-    loader.innerText = '123'
-    popup.append(loader)
-
     // save elements
     this.selectElement = select
     this.labelElement = label
     this.popupElement = popup
-    this.arrowElement = arrow
   }
 
   events() {
     // click to label
-    this.labelElement.onclick = () => {
-      if (this.countOpenSelect === 0) {
-        this.selectElement.click()
+    this.labelElement.onclick = (event) => {
+      if (!this.isOpen()) {
+        event.stopPropagation()
+        this.open()
       }
     }
     // click to select
-    this.selectElement.onclick = () => {
-      if (this.countOpenSelect === 1) {
-        this.closeSelect()
-        return
+    this.selectElement.onclick = (event) => {
+      event.stopPropagation()
+      if (!this.isOpen()) {
+        this.open()
+      } else {
+        this.close()
       }
-      this.openSelect()
     }
-    // blur on select
-    this.selectElement.onblur = () => {
-      if (this.countOpenSelect === 1) {
-        this.closeSelect()
+    document.body.onclick = () => {
+      if (this.isOpen()) {
+        this.close()
       }
     }
   }
 
-  openSelect() {
-    this.countOpenSelect++
-    this.labelElement.classList.add('topLabel')
-    this.popupElement.classList.add('show')
-    this.arrowElement.classList.add('top')
+  isOpen() {
+    return this.rootElement.classList.contains('open')
   }
 
-  closeSelect() {
-    this.countOpenSelect = 0
-    this.labelElement.classList.remove('topLabel')
-    this.popupElement.classList.remove('show')
-    this.arrowElement.classList.remove('top')
+  open() {
+    this.rootElement.classList.add('open')
+    this.rootElement.classList.remove('close')
+  }
+
+  close() {
+    this.rootElement.classList.remove('open')
+    this.rootElement.classList.add('close')
+  }
+
+  loadData() {
+    for (let dataKey in this.data) {
+      if (this.data.hasOwnProperty(dataKey)) {
+        let option = document.createElement('div')
+        option.classList.add('option')
+        option.innerText = this.data[dataKey].label
+        option.setAttribute('id', dataKey)
+        option.onclick = (ev) => {
+          let element = ev.target
+          this.select(element.getAttribute('id'))
+        }
+        this.popupElement.append(option)
+      }
+    }
+  }
+
+  select(id) {
+    console.log(id)
+    console.log(this.data[id]);
   }
 }
 
 const select = new Select({
   selector: '#select',
   label: 'Выберите технологию',
-  url: 'https://vladilen-dev.firebaseio.com/technologies.json',
+  data,
   onSelect() {
 
   }
 })
 
-document.querySelector('#actions > li > button[data-type="open"]').onclick = function() {
-  select.openSelect()
+document.querySelector('#actions > li > button[data-type="open"]').onclick = function(event) {
+  event.stopPropagation()
+  select.open()
 }
 
-document.querySelector('#actions > li > button[data-type="close"]').onclick = function() {
-  select.closeSelect()
+document.querySelector('#actions > li > button[data-type="close"]').onclick = function(event) {
+  event.stopPropagation()
+  select.close()
 }
