@@ -68,25 +68,37 @@
 }
 
 #actions button:active {
-  background: #0048ff;
+  background: #0090ff;
 }
 
 #select .popup {
   width: 350px;
+  height: 200px;
   position: absolute;
   top: 35px;
   display: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  overflow: auto;
 }
+#select .popup::-webkit-scrollbar { width: 0; }
 
 #select .option {
   line-height: 30px;
   padding: 5px;
 }
 
+#select .option.selectedOption {
+  color: #0090ff;
+}
+
 #select .option:hover {
   cursor: pointer;
   background: #cccccc;
+}
+
+#select .selected {
+  line-height: 30px;
+  position: absolute;
 }
 
 /*animate*/
@@ -139,3 +151,17 @@
 #select.close .arrow {
   animation: arrow-close 0.2s ease-in-out;
 }
+
+/*selected*/
+#select.select .label {
+  top: -20px;
+  left: 5px;
+  font-size: 12px;
+  color: #0090ff;
+  cursor: unset;
+}
+
+#log {
+  font-weight: bold;
+}
+

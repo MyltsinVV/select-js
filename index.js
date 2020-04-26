@@ -20,8 +20,15 @@ class Select {
   constructor(param) {
     this.rootElement = document.querySelector(param.selector)
     this.label = param.label
-    this.data = param.data
+    this.onSelect = param.onSelect
 
+    this.data = []
+    for (let dataKey in param.data) {
+      if (param.data.hasOwnProperty(dataKey)) {
+        this.data.push({ label: param.data[dataKey].label, id: dataKey })
+      }
+
+    }
     this.createElements()
     this.events()
     this.loadData()
@@ -33,6 +40,11 @@ class Select {
     label.innerText = this.label
     label.classList.add('label')
     this.rootElement.append(label)
+
+    // create selected
+    let selected = document.createElement('div')
+    selected.classList.add('selected')
+    this.rootElement.append(selected)
 
     // create select
     let select = document.createElement('div')
@@ -53,9 +65,16 @@ class Select {
     this.selectElement = select
     this.labelElement = label
     this.popupElement = popup
+    this.selectedElement = selected
   }
 
   events() {
+    this.selectedElement.onclick = (event) => {
+      if (!this.isOpen()) {
+        event.stopPropagation()
+        this.open()
+      }
+    }
     // click to label
     this.labelElement.onclick = (event) => {
       if (!this.isOpen()) {
@@ -94,24 +113,52 @@ class Select {
   }
 
   loadData() {
-    for (let dataKey in this.data) {
-      if (this.data.hasOwnProperty(dataKey)) {
-        let option = document.createElement('div')
-        option.classList.add('option')
-        option.innerText = this.data[dataKey].label
-        option.setAttribute('id', dataKey)
-        option.onclick = (ev) => {
-          let element = ev.target
-          this.select(element.getAttribute('id'))
-        }
-        this.popupElement.append(option)
+    let index = 0
+    for (let item of this.data) {
+      let option = document.createElement('div')
+      option.classList.add('option')
+      option.innerText = item.label
+      option.setAttribute('id', index.toString())
+      option.onclick = (ev) => {
+        this.selectedOptionElement && this.selectedOptionElement.classList.remove('selectedOption')
+        let element = ev.target
+        this.select(element.getAttribute('id'))
+        element.classList.add('selectedOption')
+        this.selectedOptionElement = element
       }
+      this.popupElement.append(option)
+      index++
     }
   }
 
-  select(id) {
-    console.log(id)
-    console.log(this.data[id]);
+  select(index) {
+    const label = this.data[index].label
+
+    this.rootElement.classList.add('select')
+    this.selectedElement.innerText = label
+    this.selectedElement.setAttribute('index', index.toString())
+
+    this.onSelect && this.onSelect(label)
+  }
+
+  get_selected() {
+    let index = this.selectedElement.getAttribute('index')
+    if (index) {
+      alert(JSON.stringify(this.data[index]))
+    }
+  }
+
+  clear() {
+    this.rootElement.classList.remove('select')
+    this.selectedElement.innerText = ''
+    this.selectedElement.removeAttribute('index')
+    this.selectedOptionElement && this.selectedOptionElement.classList.remove('selectedOption')
+
+    this.onSelect && this.onSelect('')
+  }
+
+  destroy() {
+    this.rootElement.remove()
   }
 }
 
@@ -119,8 +166,14 @@ const select = new Select({
   selector: '#select',
   label: 'Выберите технологию',
   data,
-  onSelect() {
+  onSelect(label) {
+    let log = document.querySelector('#log')
 
+    if (label) {
+      log.innerText = `Выбранный элемент: ${label}`
+    } else {
+      log.innerText = ''
+    }
   }
 })
 
@@ -132,4 +185,24 @@ document.querySelector('#actions > li > button[data-type="open"]').onclick = fun
 document.querySelector('#actions > li > button[data-type="close"]').onclick = function(event) {
   event.stopPropagation()
   select.close()
+}
+
+document.querySelector('#actions > li > button[data-type="set"]').onclick = function(event) {
+  event.stopPropagation()
+  select.select(5)
+}
+
+document.querySelector('#actions > li > button[data-type="get"]').onclick = function(event) {
+  event.stopPropagation()
+  select.get_selected()
+}
+
+document.querySelector('#actions > li > button[data-type="clear"]').onclick = function(event) {
+  event.stopPropagation()
+  select.clear()
+}
+
+document.querySelector('#actions > li > button[data-type="destroy"]').onclick = function(event) {
+  event.stopPropagation()
+  select.destroy()
 }
