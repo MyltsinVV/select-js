@@ -1,13 +1,12 @@
-const data = {
-  'aa': { label: 'JavaScript1' },
-  'ff': { label: 'JavaScript2' },
-  'bb': { label: 'JavaScript3' },
-  'gg': { label: 'JavaScript4' },
-  'tt': { label: 'JavaScript5' },
-  'ss': { label: 'JavaScript6' },
-  'qq': { label: 'JavaScript7' },
-  'cc': { label: 'JavaScript8' },
-}
+const data = [
+  { id: 1, label: 'JavaScript1' },
+  { id: 2, label: 'JavaScript2' },
+  { id: 3, label: 'JavaScript3' },
+  { id: 4, label: 'JavaScript4' },
+  { id: 5, label: 'JavaScript5' },
+  { id: 6, label: 'JavaScript6' },
+  { id: 7, label: 'JavaScript7' }
+]
 
 class Select {
   /**
@@ -21,14 +20,8 @@ class Select {
     this.rootElement = document.querySelector(param.selector)
     this.label = param.label
     this.onSelect = param.onSelect
+    this.data = param.data
 
-    this.data = []
-    for (let dataKey in param.data) {
-      if (param.data.hasOwnProperty(dataKey)) {
-        this.data.push({ label: param.data[dataKey].label, id: dataKey })
-      }
-
-    }
     this.createElements()
     this.events()
     this.loadData()
@@ -141,7 +134,7 @@ class Select {
     this.onSelect && this.onSelect(label)
   }
 
-  get_selected() {
+  getSelected() {
     let index = this.selectedElement.getAttribute('index')
     if (index) {
       alert(JSON.stringify(this.data[index]))
@@ -194,7 +187,7 @@ document.querySelector('#actions > li > button[data-type="set"]').onclick = func
 
 document.querySelector('#actions > li > button[data-type="get"]').onclick = function(event) {
   event.stopPropagation()
-  select.get_selected()
+  select.getSelected()
 }
 
 document.querySelector('#actions > li > button[data-type="clear"]').onclick = function(event) {
