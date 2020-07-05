@@ -57,10 +57,16 @@
 }
 
 #actions button {
-  border-radius: 7px;
+  padding: 2px 10px;
+  border-radius: 4px;
   background: #fff;
   box-shadow: none;
   border: 1px solid #aeaeae;
+}
+
+#actions button:hover {
+  background: #aeaeae;
+  cursor: pointer;
 }
 
 #actions button:focus {
@@ -78,7 +84,7 @@
   top: 35px;
   display: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  overflow: auto;
+  overflow-y: scroll;
 }
 #select .popup::-webkit-scrollbar { width: 0; }
 
