@@ -22,73 +22,40 @@ class Select {
     this.onSelect = param.onSelect
     this.data = param.data
 
-    this.createElements()
-    this.events()
+    this.createHtml()
+
+    this.popupElement = this.rootElement.querySelector('.popup')
+    this.selectedElement = this.rootElement.querySelector('.selected')
+    this.containerElement = this.rootElement.querySelector('.container')
+
+    this.addEvents()
     this.loadData()
   }
 
-  createElements() {
-    // create label
-    let label = document.createElement('div')
-    label.innerText = this.label
-    label.classList.add('label')
-    this.rootElement.append(label)
-
-    // create selected
-    let selected = document.createElement('div')
-    selected.classList.add('selected')
-    this.rootElement.append(selected)
-
-    // create select
-    let select = document.createElement('div')
-    select.classList.add('select')
-    this.rootElement.append(select)
-
-    //create arrow
-    let arrow = document.createElement('div')
-    arrow.classList.add('arrow')
-    select.append(arrow)
-
-    // create popup
-    let popup = document.createElement('div')
-    popup.classList.add('popup')
-    this.rootElement.append(popup)
-
-    // save elements
-    this.selectElement = select
-    this.labelElement = label
-    this.popupElement = popup
-    this.selectedElement = selected
+  createHtml() {
+    const html = `
+      <div class="container">
+        <div class="label">
+          ${ this.label }
+        </div>
+        <div class="selected"></div>
+        <div class="select">
+          <div class="arrow"></div>
+        </div>
+        <div class="popup"></div>
+      </div>
+    `
+    this.rootElement.insertAdjacentHTML('afterbegin', html)
   }
 
-  events() {
-    this.selectedElement.onclick = (event) => {
-      if (!this.isOpen()) {
-        event.stopPropagation()
-        this.open()
-      }
-    }
-    // click to label
-    this.labelElement.onclick = (event) => {
-      if (!this.isOpen()) {
-        event.stopPropagation()
-        this.open()
-      }
-    }
-    // click to select
-    this.selectElement.onclick = (event) => {
-      event.stopPropagation()
-      if (!this.isOpen()) {
-        this.open()
-      } else {
-        this.close()
-      }
-    }
-    document.body.onclick = () => {
-      if (this.isOpen()) {
-        this.close()
-      }
-    }
+  addEvents() {
+    this.containerElement.addEventListener('click', () => {
+      !this.isOpen() ? this.open() : this.close()
+    })
+
+    document.body.addEventListener('click', (event) => {
+      !event.path.some(item => item === this.rootElement) && this.close()
+    })
   }
 
   isOpen() {
@@ -106,48 +73,52 @@ class Select {
   }
 
   loadData() {
-    let index = 0
-    for (let item of this.data) {
-      let option = document.createElement('div')
-      option.classList.add('option')
-      option.innerText = item.label
-      option.setAttribute('id', index.toString())
-      option.onclick = (ev) => {
-        this.selectedOptionElement && this.selectedOptionElement.classList.remove('selectedOption')
-        let element = ev.target
-        this.select(element.getAttribute('id'))
-        element.classList.add('selectedOption')
-        this.selectedOptionElement = element
-      }
-      this.popupElement.append(option)
-      index++
-    }
+    this.data.forEach((item, index) => {
+      const htmlOption = `
+        <div class="option" index="${ index }">
+          ${ item.label }
+        </div>
+      `
+
+      this.popupElement.insertAdjacentHTML('beforeend', htmlOption)
+    })
+
+    this.popupElement.addEventListener('click', (ev) => {
+      const option = ev.target
+
+      this.select(option.getAttribute('index'))
+    })
   }
 
   select(index) {
+    const option = this.rootElement.querySelector(`.option[index = "${index}"]`)
+
+    this?.selectedOptionElement?.classList.remove('selectedOption')
+    this.selectedOptionElement = option
+
+    option.classList.add('selectedOption')
+
     const label = this.data[index].label
 
     this.rootElement.classList.add('select')
     this.selectedElement.innerText = label
     this.selectedElement.setAttribute('index', index.toString())
 
-    this.onSelect && this.onSelect(label)
+    this?.onSelect(label)
   }
 
   getSelected() {
-    let index = this.selectedElement.getAttribute('index')
-    if (index) {
-      alert(JSON.stringify(this.data[index]))
-    }
+    const index = this.selectedElement.getAttribute('index')
+
+    index && alert(JSON.stringify(this.data[index]))
   }
 
   clear() {
     this.rootElement.classList.remove('select')
     this.selectedElement.innerText = ''
     this.selectedElement.removeAttribute('index')
-    this.selectedOptionElement && this.selectedOptionElement.classList.remove('selectedOption')
-
-    this.onSelect && this.onSelect('')
+    this?.selectedOptionElement?.classList.remove('selectedOption')
+    this?.onSelect('')
   }
 
   destroy() {
@@ -160,42 +131,31 @@ const select = new Select({
   label: 'Выберите технологию',
   data,
   onSelect(label) {
-    let log = document.querySelector('#log')
-
-    if (label) {
-      log.innerText = `Выбранный элемент: ${label}`
-    } else {
-      log.innerText = ''
-    }
+    document.querySelector('#log').innerText = label ? `Выбранный элемент: ${ label }` : ''
   }
 })
 
-document.querySelector('#actions > li > button[data-type="open"]').onclick = function(event) {
+document.querySelector('button[data-type="open"]').addEventListener('click', (event) => {
   event.stopPropagation()
   select.open()
-}
+})
 
-document.querySelector('#actions > li > button[data-type="close"]').onclick = function(event) {
-  event.stopPropagation()
+document.querySelector('button[data-type="close"]').addEventListener('click', () => {
   select.close()
-}
+})
 
-document.querySelector('#actions > li > button[data-type="set"]').onclick = function(event) {
-  event.stopPropagation()
+document.querySelector('button[data-type="set"]').addEventListener('click', () => {
   select.select(5)
-}
+})
 
-document.querySelector('#actions > li > button[data-type="get"]').onclick = function(event) {
-  event.stopPropagation()
+document.querySelector('button[data-type="get"]').addEventListener('click', () => {
   select.getSelected()
-}
+})
 
-document.querySelector('#actions > li > button[data-type="clear"]').onclick = function(event) {
-  event.stopPropagation()
+document.querySelector('button[data-type="clear"]').addEventListener('click', () => {
   select.clear()
-}
+})
 
-document.querySelector('#actions > li > button[data-type="destroy"]').onclick = function(event) {
-  event.stopPropagation()
+document.querySelector('button[data-type="destroy"]').addEventListener('click', () => {
   select.destroy()
-}
+})
